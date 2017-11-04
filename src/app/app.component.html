@@ -1,0 +1,85 @@
+<app-header></app-header>
+<div class="main ng-scope">
+  <mat-horizontal-stepper [linear]="true">
+    <mat-step [stepControl]="firstFormGroup">
+      <ng-template matStepLabel>Select or Create a Maze</ng-template>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Instructions
+          </mat-panel-title>
+          <mat-panel-description>
+            Select or enter a text maze to solve in the below text box.
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>
+          Follow the legend for instructions on constructing the
+          maze. The outside edges must either be a wall or an entrance/exit to the maze.
+        </p>
+        <mat-table #table [dataSource]="legend">
+          <ng-container matColumnDef="character">
+            <mat-header-cell *matHeaderCellDef> Character </mat-header-cell>
+            <mat-cell *matCellDef="let element"> {{element.character}} </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="component">
+            <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
+            <mat-cell *matCellDef="let element"> {{element.component}} </mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        </mat-table>
+      </mat-expansion-panel>
+      <br/>
+      <form [formGroup]="firstFormGroup" class="container">
+        <mat-form-field>
+          <mat-select [(ngModel)]="mazeBox" formControlName="selectedMaze" placeholder="Select a Maze">
+            <mat-option value="{{ maze.template }}" *ngFor="let maze of mazes index as i;">{{ maze.title }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <textarea class="selected-maze" matInput placeholder="Maze Template" formControlName="mazeBox" [(ngModel)]="mazeBox"></textarea>
+        </mat-form-field>
+        <mat-toolbar>
+          <button mat-raised-button matStepperNext color="primary" (click)="solveMaze(mazeBox)">Render Maze</button>
+        </mat-toolbar>
+      </form>
+    </mat-step>
+    <mat-step [stepControl]="secondFormGroup">
+      <form [formGroup]="secondFormGroup">
+        <ng-template matStepLabel>View Rendered Maze</ng-template>
+        <h2 *ngIf="path">
+          <span *ngIf="path.length === 0">No Solution.</span>
+        </h2>
+        <div class="maze-display" *ngIf="pathfinderMatrix">
+          <div class="maze-row ng-scope" *ngFor="let row of pathfinderMatrix.nodes;">
+            <div *ngFor="let node of row;" class="maze-block ng-scope maze-block__wall"
+                 [ngClass]="{'maze-block__wall': node.walkable === false, 'maze-block__open': (node.walkable === true && !node.path && !node.start && !node.end),
+                 'maze-block__start': node.start === true, 'maze-block__end': node.end === true, 'maze-block__path': node.path === true}">
+            </div>
+          </div>
+        </div>
+        <mat-toolbar>
+          <button mat-raised-button matStepperPrevious (click)="clear()">Back</button>
+          <button mat-raised-button color="primary" (click)="showSolution()">Solve Maze</button>
+          <button mat-raised-button matStepperNext>Eat Cake</button>
+          <span class="spacer"></span>
+          <mat-chip-list *ngIf="solvedPathfinderMatrix">
+            <mat-chip color="primary" selected="true">Steps: {{ path.length }}</mat-chip>
+          </mat-chip-list>
+        </mat-toolbar>
+      </form>
+    </mat-step>
+    <mat-step>
+      <ng-template matStepLabel>There Will Be Cake</ng-template>
+      <div style="text-align: center;">
+        <h1>The Cake is a Lie!!</h1>
+        <br/><img src="http://i0.kym-cdn.com/photos/images/facebook/000/034/053/The_cake_is_a_lie.jpg" alt="The cake is a lie..."><br/><br/>
+        <mat-toolbar>
+          <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+        </mat-toolbar>
+      </div>
+    </mat-step>
+  </mat-horizontal-stepper>
+</div>
+
+<app-footer></app-footer>
